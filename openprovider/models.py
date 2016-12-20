@@ -227,7 +227,9 @@ class Record(Model):
     ttl (required)
         The Time To Live of the record; this is a value in seconds
     """
-    pass
+
+    def __str__(self):
+        return str(self.name)
 
 
 class History(Model):
@@ -242,6 +244,36 @@ class History(Model):
         New contents of the record
     """
     pass
+
+
+class ZoneDetails(Model):
+    """
+    A Zone Object
+
+    type (required)
+    name (required)
+    ip (required if no valid ip6)
+    creationDate
+    modificationDate
+    records (submodel)
+    history (submodel)
+    """
+
+    history = submodel(History, "history")
+
+    @property
+    def records(self):
+        elem = self.get_elem()
+        if elem is None:
+            return []
+
+        try:
+            return [Record(i) for i in elem['records'].array.item]
+        except (KeyError, AttributeError):
+            return []
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Address(Model):
